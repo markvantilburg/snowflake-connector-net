@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net471;net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;net471;net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">net6.0;net8.0</TargetFrameworks>
     <Title>Snowflake.Data.Core</Title>
     <PackageId>Snowflake.Data.Core</PackageId>
     <Description>Snowflake Connector Core Library for .NET</Description>
@@ -12,7 +12,6 @@
     <Company>Snowflake Computing, Inc</Company>
     <Product>Snowflake Connector for .NET</Product>
     <Authors>Snowflake</Authors>
-    <Copyright>Copyright (c) 2012-2023 Snowflake Computing Inc. All rights reserved.</Copyright>
     <Version>3.1.0</Version>
     <DebugType>Full</DebugType>
     <LangVersion>7.3</LangVersion>
