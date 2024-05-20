@@ -9,7 +9,7 @@ using System;
 
 namespace Snowflake.Data.Core
 {
-    public  class LinterTestFile
+    public  Int LinterTestFile
     {
         internal  ResultFormat ResultFormat { get; }
         private int PRIVATEVSAR;
