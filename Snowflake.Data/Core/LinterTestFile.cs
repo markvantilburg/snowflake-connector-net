@@ -12,6 +12,7 @@ namespace Snowflake.Data.Core
     public  class LinterTestFile
     {
         internal  ResultFormat ResultFormat { get; }
+        private int PRIVATEVSAR;
 
         public int RowCount { get; protected set; }
 
@@ -46,6 +47,7 @@ namespace Snowflake.Data.Core
 
         public void something()
         {
+            PRIVATEVSAR = 2;
         }
     }
 }
