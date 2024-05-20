@@ -25,15 +25,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/checkout@v4
         with:
-          dotnet-version: '8.0.x'
-          dotnet-quality: 'ga'
+            # super-linter needs the full git history to get the
+            # list of files that changed across commits
+            fetch-depth: 0
       - name: Run linters
-        uses: wearerequired/lint-action@v2
+        uses: super-linter/super-linter@v6.5.0  # x-release-please-version
         with:
-          dotnet_format: true
-          continue_on_error: true
-          check_name: ${linter} run
+          VALIDATE_ALL_CODEBASE: false
+
