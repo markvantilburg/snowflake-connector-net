@@ -38,5 +38,5 @@ jobs:
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_CHECKOV: false
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
