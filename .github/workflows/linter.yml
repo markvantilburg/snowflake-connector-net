@@ -13,6 +13,7 @@ on:
       tags:
         description: "Linter"
         required: false
+permissions: { }
 
 concurrency:
   # older builds for the same pull request number or branch should be cancelled
@@ -23,6 +24,10 @@ jobs:
   run-linter:
     name: Run linter
     runs-on: ubuntu-latest
+    permissions:
+        contents: read
+        packages: read
+        statuses: read
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
