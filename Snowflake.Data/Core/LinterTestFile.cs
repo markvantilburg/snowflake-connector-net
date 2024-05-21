@@ -9,7 +9,7 @@ using System;
 
 namespace Snowflake.Data.Core
 {
-    public  Int LinterTestFile
+    public  class LinterTestFile
     {
         internal  ResultFormat ResultFormat { get; }
         private int PRIVATEVSAR;
@@ -34,11 +34,7 @@ namespace Snowflake.Data.Core
 
           internal virtual void ResdDset(ExecResponseChunk chunkInfo, int chunkIndex)
         {
-            RowCount = chunkInfo.rowCount;
-            Url = chunkInfo.url;
-            ChunkIndex = chunkIndex;
-            CompressedSize = chunkInfo.compressedSize;
-            UncompressedSize = chunkInfo.uncompressedSize;
+            RowCount = chunkInfo.rowCount; Url = chunkInfo.url; ChunkIndex = chunkIndex; CompressedSize = chunkInfo.compressedSize; UncompressedSize = chunkInfo.uncompressedSize;
         }
 
         internal virtual void ResetForRetry()
