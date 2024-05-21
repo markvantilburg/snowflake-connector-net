@@ -1,4 +1,9 @@
 root = true
+# yml files
+[*.yml]
+indent_style = space
+indent_size = 2
+
 # All files
 [*.*]
 indent_style = space
@@ -6,7 +11,7 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 charset = utf-8
-max_line_length = 152
+max_line_length = 150
 
 # Interfaces should start with I and PascalCase
 # naming style
@@ -16,8 +21,9 @@ dotnet_naming_style.prefix_and_pascal_case.capitalization = pascal_case
 # naming symbols
 dotnet_naming_symbols.interfaces.applicable_kinds = interface
 
-dotnet_naming_rule.interfaces_begin_with_I.severity = error
-dotnet_naming_rule.interfaces_begin_with_I.symbols = interfaces
-dotnet_naming_rule.interfaces_begin_with_I.style = prefix_and_pascal_case
+dotnet_naming_rule.interfaces_begin_with.severity = error
+dotnet_naming_rule.interfaces_begin_with.symbols = interfaces
+dotnet_naming_rule.interfaces_begin_with.style = prefix_and_pascal_case
 
-dotnet_diagnostic.interfaces_begin_with_I.enabled = true
+dotnet_diagnostic.interfaces_begin_with.enabled = true
+

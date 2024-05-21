@@ -23,22 +23,27 @@ concurrency:
 jobs:
   run-linter:
     name: Run linter
-    runs-on: ubuntu-latest
-    permissions:
-         contents: read
-         packages: read
-         statuses: read
+    runs-on: windows-latest
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
-            fetch-depth: 0
-      - name: Run linters
-        uses: super-linter/super-linter@v6.5.0
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_CHECKOV: false
-          VALIDATE_JSCPD: false
-          LINTER_RULES_PATH: .github/linters
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          depth: 0
 
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.103'
+
+      - name: Install dotnet format
+        run: dotnet tool install -g dotnet-format
+
+      - name: Add dotnet tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+    #   - name: Run dotnet restore
+    #     run: dotnet restore
+
+      - name: Run Linter Bash Script
+        run: |
+          bash ci/scripts/linter.sh
