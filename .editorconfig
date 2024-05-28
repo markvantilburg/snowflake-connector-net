@@ -30,7 +30,7 @@ dotnet_diagnostic.interfaces_begin_with_I.enabled = true
 ## Static fields should start with _s
 # naming style
 dotnet_naming_rule.static_fields_begin_with_s.style = custom
-dotnet_naming_rule.static_fields_begin_with_s.required_prefix = _r
+dotnet_naming_rule.static_fields_begin_with_s.required_prefix = s_
 dotnet_naming_rule.static_fields_begin_with_s.capitalization = camel_case
 
 # naming symbols
