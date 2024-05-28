@@ -110,9 +110,9 @@ namespace Snowflake.Data.Core
         private const string SF_QUERY_RESULT_PATH = "/queries/{0}/result";
 
         private const string SF_PARAM_MULTI_STATEMENT_COUNT = "MULTI_STATEMENT_COUNT";
-        
+
         private const string SF_PARAM_QUERY_TAG = "QUERY_TAG";
-        
+
         private const int SF_QUERY_IN_PROGRESS = 333333;
 
         private const int SF_QUERY_IN_PROGRESS_ASYNC = 333334;
@@ -124,8 +124,8 @@ namespace Snowflake.Data.Core
         private readonly IRestRequester _restRequester;
 
         private CancellationTokenSource _timeoutTokenSource;
-        
-        // Merged cancellation token source for all cancellation signal. 
+
+        // Merged cancellation token source for all cancellation signal.
         // Cancel callback will be registered under token issued by this source.
         private CancellationTokenSource _linkedCancellationTokenSource;
 
@@ -151,21 +151,21 @@ namespace Snowflake.Data.Core
             _restRequester = session.restRequester;
             _queryTag = session._queryTag;
         }
-        
-        internal SFStatement(SFSession session, string queryTag) 
+
+        internal SFStatement(SFSession session, string queryTag)
         {
             SfSession = session;
             _restRequester = session.restRequester;
-            _queryTag = queryTag ?? session._queryTag; 
+            _queryTag = queryTag ?? session._queryTag;
         }
-        
+
         internal string GetBindStage() => _bindStage;
 
         private void AssignQueryRequestId()
         {
             lock (_requestIdLock)
             {
-                
+
                 if (_requestId != null)
                 {
                     logger.Info("Another query is running.");
@@ -207,8 +207,8 @@ namespace Snowflake.Data.Core
                 // remove it from parameter bindings so it won't break
                 // parameter binding feature
                 bindings.Remove(SF_PARAM_MULTI_STATEMENT_COUNT);
-            } 
-            
+            }
+
             if (_queryTag != null)
             {
                 if (bodyParameters == null)
@@ -216,7 +216,7 @@ namespace Snowflake.Data.Core
                     bodyParameters = new Dictionary<string, string>();
                 }
                 bodyParameters[SF_PARAM_QUERY_TAG] = _queryTag;
-            } 
+            }
 
             QueryRequest postBody = new QueryRequest();
             postBody.sqlText = sql;
@@ -317,7 +317,7 @@ namespace Snowflake.Data.Core
             this._timeoutTokenSource = timeout > 0 ? new CancellationTokenSource(timeout * 1000) :
                                                      new CancellationTokenSource(Timeout.InfiniteTimeSpan);
         }
-        
+
         /// <summary>
         ///     Register cancel callback. Two factors: either external cancellation token passed down from upper
         ///     layer or timeout reached. Whichever comes first would trigger query cancellation.
@@ -354,16 +354,13 @@ namespace Snowflake.Data.Core
         internal async Task<SFBaseResultSet> ExecuteAsync(int timeout, string sql, Dictionary<string, BindingDTO> bindings, bool describeOnly, bool asyncExec,
                                                           CancellationToken cancellationToken)
         {
-            // Trim the sql query and check if this is a PUT/GET command
-            string trimmedSql = TrimSql(sql);
-
-            if (IsPutOrGetCommand(trimmedSql))
+            if (IsPutOrGetCommand(sql))
             {
                 throw new NotImplementedException("Get and Put are not supported in async calls.  Use Execute() instead of ExecuteAsync().");
             }
 
             registerQueryCancellationCallback(timeout, cancellationToken);
-            
+
             int arrayBindingThreshold = 0;
             if (SfSession.ParameterMap.ContainsKey(SFSessionParameter.CLIENT_STAGE_ARRAY_BINDING_THRESHOLD))
             {
@@ -447,20 +444,18 @@ namespace Snowflake.Data.Core
 
         internal SFBaseResultSet Execute(int timeout, string sql, Dictionary<string, BindingDTO> bindings, bool describeOnly, bool asyncExec)
         {
-            // Trim the sql query and check if this is a PUT/GET command
-            string trimmedSql = TrimSql(sql);
             try
             {
-                if (IsPutOrGetCommand(trimmedSql))
+                if (IsPutOrGetCommand(sql))
                 {
                     if (asyncExec)
                     {
                         throw new NotImplementedException("Get and Put are not supported in async execution mode");
                     }
-                    return ExecuteSqlWithPutGet(timeout, trimmedSql, bindings, describeOnly);
+                    return ExecuteSqlWithPutGet(timeout, sql, bindings, describeOnly);
                 }
 
-                return ExecuteSqlOtherThanPutGet(timeout, trimmedSql, bindings, describeOnly, asyncExec);
+                return ExecuteSqlOtherThanPutGet(timeout, sql, bindings, describeOnly, asyncExec);
             }
             finally
             {
@@ -507,7 +502,7 @@ namespace Snowflake.Data.Core
                 throw new SnowflakeDbException(ex, SFError.INTERNAL_ERROR);
             }
         }
-        
+
         private SFBaseResultSet ExecuteSqlOtherThanPutGet(int timeout, string sql, Dictionary<string, BindingDTO> bindings, bool describeOnly, bool asyncExec)
         {
             try
@@ -562,7 +557,7 @@ namespace Snowflake.Data.Core
                 throw;
             }
         }
-        
+
         internal async Task<SFBaseResultSet> GetResultWithIdAsync(string resultId, CancellationToken cancellationToken)
         {
             var req = BuildResultRequestWithId(resultId);
@@ -938,7 +933,7 @@ namespace Snowflake.Data.Core
         /// </summary>
         /// <param name="originalSql">The original sql query.</param>
         /// <returns>The query without the blanks and comments at the beginning.</returns>
-        private string TrimSql(string originalSql)
+        internal static string TrimSql(string originalSql)
         {
             char[] sqlQueryBuf = originalSql.ToCharArray();
             var builder = new StringBuilder();
@@ -999,8 +994,11 @@ namespace Snowflake.Data.Core
         /// <returns>The boolean value if the query is a PUT or GET command.</returns>
         private bool IsPutOrGetCommand(string query)
         {
-            return (query.Substring(0, 3).ToUpper() == "PUT") ||
-                (query.Substring(0, 3).ToUpper() == "GET");
+            // Trim the sql query and check if this is a PUT/GET command
+            string trimmedSql = TrimSql(query);
+
+            return (trimmedSql.Substring(0, 3).ToUpper() == "PUT") ||
+                (trimmedSql.Substring(0, 3).ToUpper() == "GET");
         }
 
         private static int GetBindingCount(Dictionary<string, BindingDTO> binding)
@@ -1054,7 +1052,7 @@ namespace Snowflake.Data.Core
                      false);
 
             PutGetStageInfo stageInfo = new PutGetStageInfo();
-            
+
             SFFileTransferAgent fileTransferAgent =
                         new SFFileTransferAgent(sql, SfSession, response.data, ref _uploadStream, _destFilename, _stagePath, CancellationToken.None);
 
