@@ -354,7 +354,10 @@ namespace Snowflake.Data.Core
         internal async Task<SFBaseResultSet> ExecuteAsync(int timeout, string sql, Dictionary<string, BindingDTO> bindings, bool describeOnly, bool asyncExec,
                                                           CancellationToken cancellationToken)
         {
-            if (IsPutOrGetCommand(sql))
+            // Trim the sql query and check if this is a PUT/GET command
+            string trimmedSql = TrimSql(sql);
+
+            if (IsPutOrGetCommand(trimmedSql))
             {
                 throw new NotImplementedException("Get and Put are not supported in async calls.  Use Execute() instead of ExecuteAsync().");
             }
@@ -444,15 +447,17 @@ namespace Snowflake.Data.Core
 
         internal SFBaseResultSet Execute(int timeout, string sql, Dictionary<string, BindingDTO> bindings, bool describeOnly, bool asyncExec)
         {
+            // Trim the sql query and check if this is a PUT/GET command
+            string trimmedSql = TrimSql(sql);
             try
             {
-                if (IsPutOrGetCommand(sql))
+                if (IsPutOrGetCommand(trimmedSql))
                 {
                     if (asyncExec)
                     {
                         throw new NotImplementedException("Get and Put are not supported in async execution mode");
                     }
-                    return ExecuteSqlWithPutGet(timeout, sql, bindings, describeOnly);
+                    return ExecuteSqlWithPutGet(timeout, sql, trimmedSql, bindings, describeOnly);
                 }
 
                 return ExecuteSqlOtherThanPutGet(timeout, sql, bindings, describeOnly, asyncExec);
@@ -464,7 +469,7 @@ namespace Snowflake.Data.Core
             }
         }
 
-        private SFBaseResultSet ExecuteSqlWithPutGet(int timeout, string sql, Dictionary<string, BindingDTO> bindings, bool describeOnly)
+        private SFBaseResultSet ExecuteSqlWithPutGet(int timeout, string sql, string trimmedSql, Dictionary<string, BindingDTO> bindings, bool describeOnly)
         {
             try
             {
@@ -479,7 +484,7 @@ namespace Snowflake.Data.Core
                 logger.Debug("PUT/GET queryId: " + (response.data != null ? response.data.queryId : "Unknown"));
 
                 SFFileTransferAgent fileTransferAgent =
-                    new SFFileTransferAgent(sql, SfSession, response.data, CancellationToken.None);
+                    new SFFileTransferAgent(trimmedSql, SfSession, response.data, CancellationToken.None);
 
                 // Start the file transfer
                 fileTransferAgent.execute();
@@ -994,11 +999,8 @@ namespace Snowflake.Data.Core
         /// <returns>The boolean value if the query is a PUT or GET command.</returns>
         private bool IsPutOrGetCommand(string query)
         {
-            // Trim the sql query and check if this is a PUT/GET command
-            string trimmedSql = TrimSql(query);
-
-            return (trimmedSql.Substring(0, 3).ToUpper() == "PUT") ||
-                (trimmedSql.Substring(0, 3).ToUpper() == "GET");
+            return (query.Substring(0, 3).ToUpper() == "PUT") ||
+                (query.Substring(0, 3).ToUpper() == "GET");
         }
 
         private static int GetBindingCount(Dictionary<string, BindingDTO> binding)
